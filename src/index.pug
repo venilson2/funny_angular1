@@ -5,41 +5,118 @@ html(ng-app="meuModulo")
     meta(http-equiv="X-UA-Compatible", content="IE=edge")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title Teste
-    script(src="../lib/angular/angular.min.js")
+    link(href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet")
+    link(href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.8.2/angular.min.js")
+
   body(ng-controller="indexController")
-    header {{ title }}
-    input(type="text" ng-model="search.name" placeholder="Buscar")
-    table 
-      thread 
-        tr 
-          th Nome
-          th E-mail
-          th 1° semestre
-          th 2° semestre
-          th Média
-      thbody 
-        tr(ng-repeat="student in students | filter:search")
-          th {{ student.name }}
-          th {{ student.email }}
-          th {{ student.grade_first }}
-          th {{ student.grade_second }}
-          th {{ media(student) }}
+    header.container 
+      h2 {{ title }}
+    main.container
+      div.row
+        input(type="text" ng-model="search.name" placeholder="Buscar")
+      table.striped 
+        thead 
+          tr 
+            th Nome
+            th E-mail
+            th 1° semestre
+            th 2° semestre
+            th Média
+            th Ações
+        tbody 
+          tr(ng-repeat="student in students | filter:search")
+            td {{ student.name }}
+            td {{ student.email }}
+            td {{ student.grade_first }}
+            td {{ student.grade_second }}
+            td {{ student.media }}
+            td 
+              button(ng-click="updateStudent(student)" class="btn blue") Editar
+      br
+      a.modal-trigger.btn(ng-Click="openModal()") Abrir Modal
+
+      div#modal1.modal.modal-fixed-footer
+        div.modal-content
+          h4.center(ng-if="!isUpdated") Criar Estudante
+          h4.center(ng-if="isUpdated") Editar Estudante 
+          p Preencha os dados do aluno
+          div.row
+            div(class="input-field col m6 s12")
+              input(ng-model="student.name" type="text" class="validate" placeholder="Nome") 
+            div(class="input-field col m6 s12")
+              input(ng-model="student.email" type="email" class="validate" placeholder="E-mail")
+            div(class="input-field col m6 s12")
+              input(ng-model="student.grade_first" type="text" class="validate" placeholder="1º sem")
+            div(class="input-field col m6 s12")
+              input(ng-model="student.grade_second" type="text" class="validate" placeholder="2º sem")
+        div.modal-footer
+          a(ng-if="!isUpdated" ng-click="addStudent()" class="waves-effect waves-ligth btn-flat btn blue") Adicionar
+          a(ng-if="isUpdated" ng-click="updateStudent(student)" class="waves-effect waves-ligth btn-flat btn blue") Atualizar
+          a(ng-Click="closeModal()" class="waves-effect waves-ligth btn-flat btn red" href="#!") Fechar
+
     script.
-      angular.module("meuModulo", [])
-        .controller("indexController", function($scope){
-          $scope.title = "Angular";
+      
 
-          $scope.students = [
-            { name: "João", grade_first: 7.5, grade_second: 8.2, email: "joao@example.com" },
-            { name: "Maria", grade_first: 6.0, grade_second: 7.8, email: "maria@example.com" },
-            { name: "José", grade_first: 6.1, grade_second: 6.7, email: "jose@example.com" },
-            { name: "Ana", grade_first: 5.4, grade_second: 9.8, email: "ana@example.com" },
-            { name: "Claudia", grade_first: 6.7, grade_second: 5.8, email: "claudia@example.com" },
-          ];
+    script.
+      var app = angular.module("meuModulo", []);
+      app.controller("indexController", function($scope) {
+        $scope.title = "Angular";
 
-          $scope.media = function(student){
-            var media = (student.grade_first + student.grade_second) / 2;
-            return media.toFixed(2)
-          }
-        })
+        $scope.students = [
+          { name: "João", grade_first: 7.5, grade_second: 8.2, email: "joao@example.com" },
+          { name: "Maria", grade_first: 6.0, grade_second: 7.8, email: "maria@example.com" },
+          { name: "José", grade_first: 6.1, grade_second: 6.7, email: "jose@example.com" },
+          { name: "Ana", grade_first: 5.4, grade_second: 9.8, email: "ana@example.com" },
+          { name: "Claudia", grade_first: 6.7, grade_second: 5.8, email: "claudia@example.com" },
+        ];
 
+        var init = function() {
+          $scope.students.forEach(function(student) {
+            student.media = media(student);
+          });
+          $scope.isUpdated = false;
+          clearForm();
+        };
+
+        var media = function(student) {
+          var media = (parseFloat(student.grade_first) + parseFloat(student.grade_second)) / 2;
+          return media.toFixed(2);
+        };
+
+        $scope.addStudent = function(student){
+          $scope.isUpdated = false;
+          clearForm();
+          student.media = media(student);
+          $scope.students.push(student);
+          closeModal();
+        }
+
+        $scope.updateStudent = function(student){
+          $scope.isUpdated = true;
+          openModal();
+          angular.copy(student, $scope.student);
+          $scope.students.push(student);
+        }
+
+        var clearForm = function(){
+          $scope.student = {name: "", email: "", grade_first: "", grade_second: ""};
+        }
+
+        $scope.openModal = function() {
+          clearForm();
+          var modalElement = document.querySelector('#modal1');
+          var instance = M.Modal.init(modalElement);
+          instance.open();
+        };    
+         
+      $scope.closeModal = function(){
+        clearForm();
+        var modalElement = document.querySelector('#modal1');
+        var instance = M.Modal.getInstance(modalElement);
+        instance.close();
+      }
+        
+        init();
+      });
