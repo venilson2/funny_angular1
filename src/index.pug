@@ -1,0 +1,45 @@
+doctype html
+html(ng-app="meuModulo")
+  head
+    meta(charset="UTF-8")
+    meta(http-equiv="X-UA-Compatible", content="IE=edge")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Teste
+    script(src="../lib/angular/angular.min.js")
+  body(ng-controller="indexController")
+    header {{ title }}
+    input(type="text" ng-model="search.name" placeholder="Buscar")
+    table 
+      thread 
+        tr 
+          th Nome
+          th E-mail
+          th 1° semestre
+          th 2° semestre
+          th Média
+      thbody 
+        tr(ng-repeat="student in students | filter:search")
+          th {{ student.name }}
+          th {{ student.email }}
+          th {{ student.grade_first }}
+          th {{ student.grade_second }}
+          th {{ media(student) }}
+    script.
+      angular.module("meuModulo", [])
+        .controller("indexController", function($scope){
+          $scope.title = "Angular";
+
+          $scope.students = [
+            { name: "João", grade_first: 7.5, grade_second: 8.2, email: "joao@example.com" },
+            { name: "Maria", grade_first: 6.0, grade_second: 7.8, email: "maria@example.com" },
+            { name: "José", grade_first: 6.1, grade_second: 6.7, email: "jose@example.com" },
+            { name: "Ana", grade_first: 5.4, grade_second: 9.8, email: "ana@example.com" },
+            { name: "Claudia", grade_first: 6.7, grade_second: 5.8, email: "claudia@example.com" },
+          ];
+
+          $scope.media = function(student){
+            var media = (student.grade_first + student.grade_second) / 2;
+            return media.toFixed(2)
+          }
+        })
+
