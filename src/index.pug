@@ -33,9 +33,10 @@ html(ng-app="meuModulo")
             td {{ student.grade_second }}
             td {{ student.media }}
             td 
-              button(ng-click="updateStudent(student)" class="btn blue") Editar
+              button(ng-click="openModal(student)" class="btn blue" style="margin-right: 5px;") Editar
+              button(ng-click="deleteStudent(student)" class="btn red") Deletar
       br
-      a.modal-trigger.btn(ng-Click="openModal()") Abrir Modal
+      button.modal-trigger.btn(ng-Click="openModal()") Criar
 
       div#modal1.modal.modal-fixed-footer
         div.modal-content
@@ -52,9 +53,9 @@ html(ng-app="meuModulo")
             div(class="input-field col m6 s12")
               input(ng-model="student.grade_second" type="text" class="validate" placeholder="2º sem")
         div.modal-footer
-          a(ng-if="!isUpdated" ng-click="addStudent()" class="waves-effect waves-ligth btn-flat btn blue") Adicionar
-          a(ng-if="isUpdated" ng-click="updateStudent(student)" class="waves-effect waves-ligth btn-flat btn blue") Atualizar
-          a(ng-Click="closeModal()" class="waves-effect waves-ligth btn-flat btn red" href="#!") Fechar
+          a(ng-if="!isUpdated" ng-click="createStudent()" class="btn blue" style="margin-right: 5px;") Adicionar
+          a(ng-if="isUpdated" ng-click="updateStudent(student)" class="btn blue" style="margin-right: 5px;") Atualizar
+          a(ng-Click="closeModal()" class="btn red" href="#!") Fechar
 
     script.
       
@@ -80,43 +81,52 @@ html(ng-app="meuModulo")
           clearForm();
         };
 
-        var media = function(student) {
-          var media = (parseFloat(student.grade_first) + parseFloat(student.grade_second)) / 2;
-          return media.toFixed(2);
-        };
-
-        $scope.addStudent = function(student){
-          $scope.isUpdated = false;
-          clearForm();
+        $scope.createStudent = function(student){
           student.media = media(student);
           $scope.students.push(student);
-          closeModal();
+          $scope.closeModal();
         }
 
         $scope.updateStudent = function(student){
-          $scope.isUpdated = true;
-          openModal();
-          angular.copy(student, $scope.student);
           $scope.students.push(student);
+          $scope.closeModal();
         }
 
-        var clearForm = function(){
-          $scope.student = {name: "", email: "", grade_first: "", grade_second: ""};
+        $scope.deleteStudent = function(student){
         }
 
-        $scope.openModal = function() {
+        $scope.openModal = function(student) {
           clearForm();
+          verifyIsCreateOrEdit(student);
           var modalElement = document.querySelector('#modal1');
           var instance = M.Modal.init(modalElement);
           instance.open();
         };    
          
-      $scope.closeModal = function(){
-        clearForm();
-        var modalElement = document.querySelector('#modal1');
-        var instance = M.Modal.getInstance(modalElement);
-        instance.close();
-      }
+        $scope.closeModal = function(){
+          clearForm();
+          var modalElement = document.querySelector('#modal1');
+          var instance = M.Modal.getInstance(modalElement);
+          instance.close();
+        }
+
+        const clearForm = function(){
+          $scope.student = {name: "", email: "", grade_first: "", grade_second: ""};
+        }
+
+        const media = function(student) {
+          var media = (parseFloat(student.grade_first) + parseFloat(student.grade_second)) / 2;
+          return media.toFixed(2);
+        };
+
+        const verifyIsCreateOrEdit = function(student){
+          if(student){
+            $scope.isUpdated = true;
+            angular.copy(student, $scope.student);
+          } else {
+            $scope.isUpdated = false;
+          }
+        };
         
         init();
       });
